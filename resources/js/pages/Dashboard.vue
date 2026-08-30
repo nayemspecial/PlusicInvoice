@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 
 defineProps<{ tenant: { name: string; subdomain: string } }>();
 
@@ -42,6 +42,17 @@ const logout = () => {
             >
                 Log out
             </button>
+
+            <!-- role-gated in the UI too (not just the backend) — a nicety, not the
+                 real security boundary. The 'role:owner' route middleware is what
+                 actually protects /team; hiding the link is just good UX. -->
+            <Link
+                v-if="page.props.auth.user?.role === 'owner'"
+                href="/team"
+                class="block mt-3 text-[13px] font-semibold text-muted hover:text-ink"
+            >
+                Manage team →
+            </Link>
         </div>
     </div>
 </template>

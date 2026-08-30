@@ -32,6 +32,11 @@ working (not just "code written" — actually run and confirmed).
 - [x] `TenantSeeder` — creates Northwind/Fenwick/Acme tenant rows, provisions each database
 - [x] `TenantDatabaseSeeder` — seeds one tenant's DB (owner user, clients, invoices matching
       `design_references/dashboard.html` demo numbers)
+- [x] Fixed: `migrate:fresh` only resets the central DB, not tenant databases (separate
+      physical MySQL DBs). `TenantSeeder` now drops the 3 demo tenant databases first
+      (`TenantProvisioningService::dropTenantDatabaseForSubdomain()` — dev/seeding only,
+      never called from the real signup flow) so re-running `migrate:fresh --seed`
+      during development is safe and repeatable.
 - [ ] **You run:** `php artisan migrate:fresh --seed` and confirm 3 tenant databases exist with data
 
 ## Phase 3.5 — Frontend/layout foundation
@@ -51,7 +56,8 @@ working (not just "code written" — actually run and confirmed).
       `auth`/`guest` middleware aliases are priority-listed by the framework, which kept
       reordering `IdentifyTenant` to run too late. Replaced with custom `tenant.auth` /
       `tenant.guest` middleware that Laravel has no ordering opinion about.
-- [ ] **You run:** local subdomain testing setup below, then register + login + logout by hand
+- [x] **Verified by hand:** login, logout, register (first user owner, second user viewer),
+      cross-tenant isolation (Northwind's credentials correctly rejected on Fenwick), rate limiting
 
 ### Local subdomain testing (do this once)
 `php artisan serve` doesn't do Host-header routing — it serves one app regardless of
@@ -68,7 +74,20 @@ Then visit `http://northwind.plusicinvoice.test:9800/register` (or `/login` — 
 owner is `owner@northwind.test` / `password`).
 
 ## Phase 5 — Role-based access
-- [ ] Middleware/policy enforcing Owner / Admin / Accountant / Viewer per route
+- [x] `role:owner` route middleware (`EnsureUserHasRole`) + Gate abilities
+      (`manageTeam`, `manageBilling`, `manageInvoices`, `viewInvoices`) for finer checks
+- [x] Team invite flow: invite by email+role (signed URL, 7-day expiry, emailed via
+      `MAIL_MAILER=log`), revoke pending invite, accept invite → creates account
+- [x] Owner can change a member's role from the Team page; can't demote the last owner
+- [x] **Architecture change:** `IdentifyTenant` is now GLOBAL middleware (not
+      route-scoped) — see `docs/CONTEXT.md` for why (Phase 5's signed routes + route
+      model binding exposed the same class of bug Phase 4 had with `Authenticate`)
+- [ ] **You run:** register as owner (already done in Phase 4) → visit `/team` → invite
+      a second email → check `storage/logs/laravel.log` for the invite email → copy the
+      signed link → open it in an incognito window → accept → confirm the new user has
+      the invited role → as owner, try changing your own role away from owner while
+      being the only owner (should be blocked) → invite a second owner-role... (can't,
+      role dropdown only offers admin/accountant/viewer for invites, by design)
 
 ## Phase 6 — Client CRUD
 - [ ] Inertia pages: list, create, edit, view (with invoice history)

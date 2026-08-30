@@ -5,11 +5,13 @@ namespace App\Models\Tenants;
 use Database\Factories\Tenants\UserFactory;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 
 /**
@@ -17,15 +19,16 @@ use Illuminate\Notifications\Notifiable;
  * last connected to. Never used outside of a resolved tenant context (see IdentifyTenant
  * middleware). This is deliberately a separate class from the central App\Models\User.
  *
- * Implements AuthenticatableContract + CanResetPasswordContract manually (rather than
- * extending Laravel's opinionated Illuminate\Foundation\Auth\User base class) so this
- * stays a plain Eloquent model we fully control, while still plugging into Laravel's
- * own Auth guard and Password broker — framework primitives, not a scaffolding package.
+ * Implements AuthenticatableContract + CanResetPasswordContract + AuthorizableContract
+ * manually (rather than extending Laravel's opinionated Illuminate\Foundation\Auth\User
+ * base class) so this stays a plain Eloquent model we fully control, while still
+ * plugging into Laravel's own Auth guard, Password broker, and Gate/can() system —
+ * framework primitives, not a scaffolding package.
  */
-class User extends Model implements AuthenticatableContract, CanResetPasswordContract
+class User extends Model implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
     /** @use HasFactory<UserFactory> */
-    use Authenticatable, CanResetPassword, HasFactory, Notifiable;
+    use Authenticatable, Authorizable, CanResetPassword, HasFactory, Notifiable;
 
     protected $connection = 'tenant';
 

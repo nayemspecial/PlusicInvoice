@@ -89,4 +89,20 @@ class TenantProvisioningService
 
         return "{$central}_tenant_{$slug}";
     }
+
+    /**
+     * DEV/SEEDING ONLY — never call this from the real signup flow or anywhere else
+     * that could run in production. `php artisan migrate:fresh` only resets the
+     * CENTRAL database; each tenant's database is a separate physical MySQL database
+     * that `migrate:fresh` never touches. Without this, re-running `migrate:fresh
+     * --seed` during development hits duplicate-email errors against LEFTOVER tenant
+     * databases from the previous seed run. TenantSeeder calls this before
+     * re-creating each demo tenant.
+     */
+    public function dropTenantDatabaseForSubdomain(string $subdomain): void
+    {
+        $databaseName = $this->databaseNameFor($subdomain);
+
+        DB::statement("DROP DATABASE IF EXISTS `{$databaseName}`");
+    }
 }

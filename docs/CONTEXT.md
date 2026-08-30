@@ -61,25 +61,48 @@ Seeded tenants and numbers are taken directly from `design_references/dashboard.
   keeps it a plain Eloquent model while still working with Auth guards and the Password broker.
 - Password reset uses `Password::broker('tenant_users')`, configured with `'connection' =>
   'tenant'` in `config/auth.php` — reads/writes whichever tenant DB is currently connected.
-- **Ordering fix (final):** Laravel's built-in `Authenticate`/`RedirectIfAuthenticated`
-  middleware (used by the `auth`/`guest` aliases) are part of the framework's fixed
-  `$middlewarePriority` list. Our custom `tenant` (IdentifyTenant) middleware is NOT in that
-  list — and whenever a priority-listed middleware is present, Laravel re-sorts the ENTIRE
-  middleware chain, which repeatedly caused `Authenticate` to run before `IdentifyTenant`
-  despite being registered after it in `routes/web.php`. Symptom: `SQLSTATE[HY000] [1049]
-  Unknown database 'unset_tenant_connection'` on random queries (sessions, then users).
-  Two earlier fix attempts (`prependToPriorityList` targeting different classes) were
-  unreliable. **The actual fix:** stopped using Laravel's built-in `auth`/`guest` aliases for
-  tenant routes entirely — replaced with custom `tenant.auth` / `tenant.guest` middleware
-  (`EnsureTenantUserIsAuthenticated`, `RedirectIfTenantUserAuthenticated`). Neither is in
-  Laravel's priority list, so they always run in plain registration order — after `tenant`,
-  exactly as written. Lesson: don't mix custom route-ordering-dependent middleware with any
-  of Laravel's priority-listed built-ins; write the small amount of custom logic instead.
+- **Ordering fix (FINAL, Phase 5 — architecture changed again):** the previous fix
+  (custom `tenant.auth`/`tenant.guest` instead of Laravel's built-ins) solved the
+  Authenticate-ordering bug, but Phase 5's `{invitation}`/`{user}` route-model-binding
+  and the `signed` middleware (both Laravel built-ins, both priority-listed) hit the
+  SAME class of bug again. **Root cause, properly understood this time:** ANY
+  priority-listed Laravel middleware mixed into a route can cause the framework to
+  re-sort the whole chain, and our route-scoped `IdentifyTenant` had no fixed position
+  to defend itself with. **The real fix:** `IdentifyTenant` is now a GLOBAL middleware
+  (`$middleware->web(append: [...])`  in `bootstrap/app.php`, listed FIRST of our custom
+  additions) — it runs for every request, connects the DB if the subdomain matches a
+  tenant, and never aborts. A separate, tiny route-level `RequireTenant` middleware
+  (aliased to `tenant`) just checks `app()->bound('currentTenant')` and 404s if not —
+  it does no DB work itself, so it has nothing for the priority-list to break. Global
+  middleware order among our OWN custom classes is simple sequential registration order
+  (no priority-list involved when neither class is framework-priority-listed), which is
+  why this is finally robust. Lesson: don't fight Laravel's `$middlewarePriority` list —
+  sidestep it by keeping order-critical logic global and order-insensitive logic
+  (simple boolean checks) route-scoped.
 - `SESSION_CONNECTION=mysql` is set explicitly in `.env` (not left as `null`/default) so
   session storage never depends on ambiguous default-connection resolution.
 - Local dev: `php artisan serve` doesn't do Host-header routing, so multi-subdomain testing
   only needs hosts-file entries (or `*.localhost`, which modern browsers resolve to 127.0.0.1
   automatically — no hosts file needed at all), not a real web server / virtual host config.
+
+## Phase 5 additions (role-based access + team invites)
+- Two authorization mechanisms, used for different situations — both are Laravel
+  primitives, no package: **`role:owner` route middleware** (`EnsureUserHasRole`) for
+  "this whole route requires role X", and **Gate abilities** (`$user->can('manageTeam')`,
+  defined in `AppServiceProvider::configureTenantGates()`) for finer-grained checks mixed
+  into other logic (e.g. "show this button only if..."). `App\Models\Tenants\User` needed
+  the `Authorizable` trait/contract added for `->can()` to work — same pattern as
+  `Authenticatable`/`CanResetPassword` in Phase 4: framework trait, not a package.
+- Team invites use `URL::temporarySignedRoute()` (Laravel's signed URLs) instead of a
+  separate hashed-token column — the signature itself is tamper-proof and self-expiring.
+  Only password reset uses the hashed-token-in-DB pattern (Laravel's own default for that
+  specific broker); invites don't need it since there's no separate "broker" involved.
+  See `app/Http/Controllers/Team/`.
+- Mail is sent via `MAIL_MAILER=log` in dev — invite emails land in
+  `storage/logs/laravel.log` instead of actually sending. Fine for local testing; swap
+  the mailer config for a real provider before going live.
+- `invitations` table lives in the TENANT database (`database/migrations/tenant/`), same
+  as everything else team-related — invitations are scoped to one workspace, not central.
 
 ## Backend conventions
 - Money stored as decimal(10,2), currency as a 3-letter string column (`USD` default).
