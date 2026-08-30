@@ -42,6 +42,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Used by all tenant-workspace routes (registration, login, dashboard, etc.).
+        // Resolves against App\Models\Tenants\User, which always queries whichever
+        // database the 'tenant' connection currently points to (see IdentifyTenant).
+        'tenant' => [
+            'driver' => 'session',
+            'provider' => 'tenant_users',
+        ],
     ],
 
     /*
@@ -65,6 +73,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'tenant_users' => [
+            'driver' => 'eloquent',
+            'model' => \App\Models\Tenants\User::class,
         ],
 
         // 'users' => [
@@ -98,6 +111,17 @@ return [
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,
+        ],
+
+        // 'connection' => 'tenant' is what makes this broker read/write the tenant's
+        // OWN password_reset_tokens table (not the central one) — DatabaseTokenRepository
+        // hashes the token before storing it (Laravel's default behavior, not custom code).
+        'tenant_users' => [
+            'provider' => 'tenant_users',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+            'connection' => 'tenant',
         ],
     ],
 

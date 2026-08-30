@@ -31,6 +31,12 @@ class HandleInertiaRequests extends Middleware
      *
      * @see https://inertiajs.com/shared-data
      *
+     * For tenant-workspace routes, 'auth' and 'currentTenant' are overwritten by
+     * IdentifyTenant middleware AFTER this runs (both call Inertia::share(), and later
+     * calls win) — see app/Http/Middleware/IdentifyTenant.php for why that's the correct
+     * place for tenant-guard data, not here. This only covers the central 'web' guard,
+     * used by the marketing site / central admin routes that have no tenant at all.
+     *
      * @return array<string, mixed>
      */
     public function share(Request $request): array
@@ -41,6 +47,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'currentTenant' => null,
         ];
     }
 }

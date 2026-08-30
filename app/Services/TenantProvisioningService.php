@@ -25,9 +25,25 @@ class TenantProvisioningService
      */
     public function connectAsTenant(Tenant $tenant): void
     {
+        if (blank($tenant->database_name)) {
+            throw new \RuntimeException(
+                "Tenant #{$tenant->id} ({$tenant->subdomain}) has no database_name set — cannot connect."
+            );
+        }
+
         config(['database.connections.tenant.database' => $tenant->database_name]);
         DB::purge('tenant');
         DB::reconnect('tenant');
+
+        // Fail LOUD and immediately if the switch didn't actually take effect, instead
+        // of letting some unrelated later query surface a confusing "Unknown database
+        // 'unset_tenant_connection'" error far from the real cause.
+        $actual = DB::connection('tenant')->getDatabaseName();
+        if ($actual !== $tenant->database_name) {
+            throw new \RuntimeException(
+                "Tenant connection switch failed: expected database '{$tenant->database_name}' but connection reports '{$actual}'."
+            );
+        }
     }
 
     /**

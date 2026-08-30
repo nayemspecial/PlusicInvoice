@@ -5,9 +5,28 @@
 @source "../**/*.blade.php";
 @source "../**/*.js";
 
+/*
+ * Design tokens taken directly from design_references/dashboard.html and index.html
+ * (the approved mockups). Keep these two files and this palette in sync — if the
+ * design changes, update the mockup first, then mirror the values here.
+ */
 @theme inline {
     --font-sans:
-        Instrument Sans, ui-sans-serif, system-ui, sans-serif,
+        'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --color-canvas: #F4F9F6;
+    --color-card: #FFFFFF;
+    --color-border: #E9F1EC;
+    --color-ink: #132A1E;
+    --color-muted: #77897E;
+    --color-primary: #173B28;
+    --color-primary-soft: #2C6248;
+    --color-mint: #DDF3E3;
+    --color-mint-strong: #3FAE6A;
+    --color-red: #E15A4A;
+    --color-amber: #D9A441;
 }
+

@@ -34,13 +34,38 @@ working (not just "code written" — actually run and confirmed).
       `design_references/dashboard.html` demo numbers)
 - [ ] **You run:** `php artisan migrate:fresh --seed` and confirm 3 tenant databases exist with data
 
+## Phase 3.5 — Frontend/layout foundation
+- [x] Fixed `app.blade.php` + `app.ts` Inertia wiring (was placeholder from the "no auth" starter)
+- [x] Design tokens (colors, fonts) added to `resources/css/app.css`, matching `design_references/`
+- [x] `GuestLayout.vue` — minimal layout for auth pages
+- [ ] `AppLayout.vue` (full sidebar shell, matching `dashboard.html`) — build in Phase 6
+
 ## Phase 4 — Custom authentication (tenant-scoped)
-- [ ] Registration: `Hash::make()`, creates first user as `owner` role
-- [ ] Login: manual credential check, `Auth::login()`, `session()->regenerate()`
-- [ ] Logout: session invalidate + CSRF token regenerate
-- [ ] Rate limiting on login (`RateLimiter` facade, 5/min per email+IP)
-- [ ] Remember-me (hashed token)
-- [ ] Password reset (signed, expiring, single-use token)
+- [x] Registration: `Hash::make()`, creates first user as `owner` role
+- [x] Login: manual credential check, `Auth::login()`, `session()->regenerate()`
+- [x] Logout: session invalidate + CSRF token regenerate
+- [x] Rate limiting on login (`RateLimiter` facade, 5/min per email+IP)
+- [x] Remember-me (`Auth::guard('tenant')->login($user, remember: true)`)
+- [x] Password reset (Laravel's `Password` broker, tenant-scoped, hashed tokens by default)
+- [x] Fixed the real bug (took 3 attempts — see `docs/CONTEXT.md`): Laravel's built-in
+      `auth`/`guest` middleware aliases are priority-listed by the framework, which kept
+      reordering `IdentifyTenant` to run too late. Replaced with custom `tenant.auth` /
+      `tenant.guest` middleware that Laravel has no ordering opinion about.
+- [ ] **You run:** local subdomain testing setup below, then register + login + logout by hand
+
+### Local subdomain testing (do this once)
+`php artisan serve` doesn't do Host-header routing — it serves one app regardless of
+hostname — so no Laragon virtual host config is needed. Just map the subdomains to
+`127.0.0.1` in your **hosts file** (Windows: `C:\Windows\System32\drivers\etc\hosts`,
+edit as Administrator):
+```
+127.0.0.1 plusicinvoice.test
+127.0.0.1 northwind.plusicinvoice.test
+127.0.0.1 fenwick.plusicinvoice.test
+127.0.0.1 acme.plusicinvoice.test
+```
+Then visit `http://northwind.plusicinvoice.test:9800/register` (or `/login` — the seeded
+owner is `owner@northwind.test` / `password`).
 
 ## Phase 5 — Role-based access
 - [ ] Middleware/policy enforcing Owner / Admin / Accountant / Viewer per route

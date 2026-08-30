@@ -21,8 +21,19 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // 'tenant' resolves the subdomain and switches the DB connection — apply this
         // to any route group serving a tenant workspace. See app/Http/Middleware/IdentifyTenant.php
+        //
+        // NOTE: we deliberately do NOT reorder middleware priority here. Route middleware
+        // (like 'tenant') already runs AFTER all global 'web' group middleware (including
+        // session handling) by Laravel's normal default behavior — which is exactly the
+        // order we want. An earlier version of this file tried to force 'tenant' to run
+        // before HandleInertiaRequests via prependToPriorityList(), which backfired: it
+        // pushed IdentifyTenant to run before session start too, and briefly broke the
+        // session table's DB connection. See HandleInertiaRequests — it no longer needs
+        // special ordering because IdentifyTenant now shares the tenant user itself.
         $middleware->alias([
             'tenant' => \App\Http\Middleware\IdentifyTenant::class,
+            'tenant.auth' => \App\Http\Middleware\EnsureTenantUserIsAuthenticated::class,
+            'tenant.guest' => \App\Http\Middleware\RedirectIfTenantUserAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
