@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Invoice extends Model
 {
@@ -17,6 +18,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'invoice_number',
+        'public_token',
         'client_id',
         'status',
         'issue_date',
@@ -45,6 +47,16 @@ class Invoice extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        // Every invoice gets a public_token the moment it's created, whether or not
+        // it's ever actually shared — simpler than generating one lazily on first
+        // share, and the column is unique+not-null so there's no valid state without it.
+        static::creating(function (Invoice $invoice) {
+            $invoice->public_token ??= (string) Str::uuid();
+        });
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -60,9 +72,19 @@ class Invoice extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function isOverdue(): bool
+    /**
+     * The stored 'status' column only changes when someone explicitly acts (send,
+     * mark paid, cancel) — nothing automatically flips it to 'overdue' yet (that would
+     * need a scheduled command, a good Phase 11+ addition). This computes what the
+     * status SHOULD show as right now, for display purposes, without touching the DB.
+     */
+    public function effectiveStatus(): string
     {
-        return $this->status === 'sent' && $this->due_date->isPast();
+        if ($this->status === 'sent' && $this->due_date->isPast()) {
+            return 'overdue';
+        }
+
+        return $this->status;
     }
 
     /**
@@ -74,5 +96,18 @@ class Invoice extends Model
         $subtotal = $this->items()->sum('line_total');
         $this->subtotal = $subtotal;
         $this->total = $subtotal + $this->tax_amount - $this->discount;
+    }
+
+    /**
+     * Simple sequential numbering per tenant database, e.g. INV-0001, INV-0042.
+     * Not race-condition-proof under heavy concurrent creation (two requests could
+     * theoretically read the same count() before either inserts) — acceptable for
+     * this project's scale, and a documented, explainable trade-off if asked.
+     */
+    public static function nextInvoiceNumber(): string
+    {
+        $next = static::count() + 1;
+
+        return 'INV-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 }

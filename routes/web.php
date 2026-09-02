@@ -4,7 +4,10 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Clients\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Invoices\InvoiceController;
+use App\Http\Controllers\Invoices\InvoicePublicController;
 use App\Http\Controllers\Team\AcceptInvitationController;
 use App\Http\Controllers\Team\TeamController;
 use Illuminate\Support\Facades\Route;
@@ -49,12 +52,29 @@ Route::middleware('tenant')->group(function (): void {
         Route::post('invitations/{invitation}/accept', [AcceptInvitationController::class, 'store']);
     });
 
+    // Public, no-login invoice view — reached via the invoice's public_token (UUID),
+    // not its sequential ID, so it can't be guessed. No 'tenant.auth' here on purpose.
+    Route::get('pay/{invoice:public_token}', [InvoicePublicController::class, 'show'])->name('invoices.public');
+
     // Requires a logged-in tenant user. Custom middleware (not Laravel's 'auth' alias)
     // — see EnsureTenantUserIsAuthenticated for why.
     Route::middleware('tenant.auth')->group(function (): void {
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
         Route::get('dashboard', DashboardController::class)->name('dashboard');
+
+        // Any logged-in tenant user can browse/view clients — create/update/delete are
+        // gated per-action inside ClientController via ClientPolicy (viewers are
+        // read-only), not by a blanket route middleware, since 'view' vs 'create' vs
+        // 'delete' need different rules for the SAME resource.
+        Route::resource('clients', ClientController::class);
+
+        // Same pattern as clients: viewAny/view open to all tenant users, finer
+        // create/update/delete rules live in InvoicePolicy, not route middleware.
+        Route::resource('invoices', InvoiceController::class);
+        Route::patch('invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');
+        Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
+        Route::patch('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
 
         // Owner-only — 'role:owner' aborts with a 403 for anyone else before the
         // controller even runs. See EnsureUserHasRole.

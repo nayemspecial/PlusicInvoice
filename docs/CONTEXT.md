@@ -104,6 +104,53 @@ Seeded tenants and numbers are taken directly from `design_references/dashboard.
 - `invitations` table lives in the TENANT database (`database/migrations/tenant/`), same
   as everything else team-related — invitations are scoped to one workspace, not central.
 
+## Phase 6 additions (Client CRUD) — a real bug caught and fixed
+- **Bug found while building this phase:** `$this->authorize()` (the `AuthorizesRequests`
+  trait) and `$request->user()` both resolve against Laravel's DEFAULT auth guard
+  (`config('auth.defaults.guard')` = `'web'`) unless told otherwise — NOT our `tenant`
+  guard. Every tenant-scoped controller written this way would have silently checked
+  authorization against a guard nobody is ever logged into, always failing (or, for
+  `$request->user()`, returning null and crashing). This had already been silently
+  wrong in `TeamController::invite()` since Phase 5.
+- **The fix:** `IdentifyTenant` (global middleware) now also runs
+  `config(['auth.defaults.guard' => 'tenant'])` whenever a tenant is resolved. Central
+  routes (no tenant) keep the normal `'web'` default. This means `$request->user()`,
+  `Auth::user()`, `Gate::authorize()`, `$this->authorize()`, and Policy classes all now
+  work correctly on tenant routes WITHOUT writing `guard('tenant')` everywhere — the one
+  correct fix in the middleware makes every future controller "just work" by default.
+- `App\Policies\Tenants\ClientPolicy` — namespaced to mirror `App\Models\Tenants\Client`
+  so Laravel's policy auto-discovery finds it; also registered explicitly in
+  `AppServiceProvider::configureTenantPolicies()` as a defensive backup.
+- Authorization split by ACTION, not one blanket role check: `viewAny`/`view` — any
+  tenant user; `create`/`update` — owner/admin/accountant; `delete` — owner/admin only
+  (an accountant can fix a client's details but not delete the client and cascade-delete
+  its invoice history).
+
+## Phase 7 additions (Invoice CRUD)
+- `public_token` (UUID) powers the no-login public invoice link — deliberately a
+  SEPARATE column from the sequential `id`, so a client can't guess other invoices by
+  incrementing a number in the URL. Auto-generated in `Invoice::booted()`'s `creating`
+  hook, so it's never in an invalid state.
+- Status transitions (`send`, `markAsPaid`, `cancel`) are separate PATCH endpoints, not
+  one generic "update status" action — each has its own `InvoicePolicy` rule AND its
+  own "which prior status is this valid from" check in the controller. Two authorization
+  layers on purpose: the Policy answers "can this ROLE ever do this", the controller's
+  status check answers "can this invoice, RIGHT NOW, have this done to it".
+- Editing/deleting is restricted to `status === 'draft'` — enforced in the controller
+  (`InvoiceController`), not the Policy. A `Policy::update()` returning true means "this
+  role is allowed to edit invoices in general"; whether THIS SPECIFIC invoice is
+  currently editable is a business-state question, not a role question — keeping them
+  separate avoids the Policy needing to know about invoice lifecycle rules.
+- `effectiveStatus()` on the model computes "Overdue" for display (a `sent` invoice
+  past due) without changing the stored `status` column — no scheduled job exists yet
+  to actually flip it. A real scheduled command (`php artisan invoices:mark-overdue`,
+  run hourly) would be a natural next addition, and is a good "what would you add with
+  more time" interview answer.
+- Invoice numbering (`Invoice::nextInvoiceNumber()`) is a simple `count()+1`, not
+  race-condition-safe under heavy concurrent creation — a known, documented trade-off
+  acceptable at this project's scale. A production system at higher volume would use a
+  DB-level sequence or a locking transaction instead.
+
 ## Backend conventions
 - Money stored as decimal(10,2), currency as a 3-letter string column (`USD` default).
 - Every tenant-scoped model uses `protected $connection = 'tenant';` — copy an existing one
@@ -123,6 +170,9 @@ Seeded tenants and numbers are taken directly from `design_references/dashboard.
   app-wide. Don't hardcode hex colors in components; use these tokens so the whole app stays
   visually consistent with the approved mockups.
 - `resources/js/layouts/GuestLayout.vue` — minimal centered-card layout for login/register/reset
-  pages. The full sidebar `AppLayout.vue` (matching `dashboard.html`) is built later, in Phase 6,
-  alongside the pages that actually need it.
+  pages. `resources/js/layouts/AppLayout.vue` — the full sidebar shell, matching
+  `dashboard.html` exactly (built in Phase 5.5, once real authenticated pages existed to
+  test it against). Every authenticated tenant page wraps its content in `<AppLayout>`;
+  nav items for pages that don't exist yet (Invoices, Clients, Billing, Settings) render
+  disabled with a "soon" badge rather than being omitted or linking to a 404.
 

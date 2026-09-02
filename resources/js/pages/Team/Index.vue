@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, router, useForm } from '@inertiajs/vue3';
 
 interface Member {
     id: number;
@@ -20,7 +21,6 @@ defineProps<{
     pendingInvitations: PendingInvitation[];
 }>();
 
-const page = usePage();
 const roles = ['admin', 'accountant', 'viewer'];
 
 const inviteForm = useForm({ email: '', role: 'viewer' });
@@ -41,19 +41,12 @@ const changeRole = (userId: number, role: string) => {
 
 <template>
     <Head title="Team" />
-    <div class="min-h-screen bg-canvas p-6 lg:p-10">
-        <div class="max-w-2xl mx-auto">
-            <h1 class="text-[22px] font-bold text-ink mb-1">Team</h1>
-            <p class="text-[13.5px] text-muted mb-8">
-                Workspace: {{ page.props.currentTenant?.name }}
-            </p>
+    <AppLayout>
+        <template #title>Team</template>
 
-            <div v-if="page.props.flash?.status" class="mb-6 text-[13px] font-medium text-mint-strong">
-                {{ page.props.flash.status }}
-            </div>
-
+        <div class="max-w-2xl space-y-6">
             <!-- Invite form -->
-            <div class="bg-card border border-border rounded-2xl p-6 mb-6">
+            <div class="bg-card border border-border rounded-2xl p-6">
                 <h2 class="text-[15px] font-bold text-ink mb-4">Invite a teammate</h2>
                 <form @submit.prevent="sendInvite" class="flex flex-col sm:flex-row gap-3">
                     <input
@@ -80,7 +73,7 @@ const changeRole = (userId: number, role: string) => {
             </div>
 
             <!-- Pending invitations -->
-            <div v-if="pendingInvitations.length" class="bg-card border border-border rounded-2xl p-6 mb-6">
+            <div v-if="pendingInvitations.length" class="bg-card border border-border rounded-2xl p-6">
                 <h2 class="text-[15px] font-bold text-ink mb-4">Pending invitations</h2>
                 <div class="space-y-3">
                     <div v-for="inv in pendingInvitations" :key="inv.id" class="flex items-center justify-between text-[13.5px]">
@@ -116,5 +109,5 @@ const changeRole = (userId: number, role: string) => {
                 </div>
             </div>
         </div>
-    </div>
+    </AppLayout>
 </template>

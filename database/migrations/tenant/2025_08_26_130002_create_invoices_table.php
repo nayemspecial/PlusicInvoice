@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::connection('tenant')->create('invoices', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_number')->unique();
+            $table->uuid('public_token')->unique(); // powers the no-login public share link
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->enum('status', ['draft', 'sent', 'paid', 'overdue', 'cancelled'])->default('draft');
             $table->date('issue_date');

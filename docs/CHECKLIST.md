@@ -89,13 +89,46 @@ owner is `owner@northwind.test` / `password`).
       being the only owner (should be blocked) → invite a second owner-role... (can't,
       role dropdown only offers admin/accountant/viewer for invites, by design)
 
+## Phase 5.5 — App shell (Master Layout)
+- [x] `AppLayout.vue` built — matches `design_references/dashboard.html` exactly
+      (collapsible sidebar, mobile drawer, topbar with tenant name + user + logout)
+- [x] `Dashboard.vue` and `Team/Index.vue` migrated to use it (removed their own
+      ad-hoc headers/logout buttons — the layout owns those now)
+- [x] Nav items for Invoices/Clients/Billing/Settings are present but shown disabled
+      ("soon" badge) until their respective phases build the actual pages/routes
+- [ ] **You run:** reload `/dashboard` and `/team`, confirm sidebar collapse (desktop)
+      and the mobile hamburger drawer both work, and disabled nav items don't navigate
+
 ## Phase 6 — Client CRUD
-- [ ] Inertia pages: list, create, edit, view (with invoice history)
+- [x] Inertia pages: list (search + pagination), create, edit, view (with invoice history)
+- [x] `ClientPolicy` — view/viewAny for anyone, create/update for owner+admin+accountant,
+      delete restricted to owner+admin
+- [x] Fixed a real bug: default auth guard mismatch broke `$this->authorize()` and
+      `$request->user()` on tenant routes — see `docs/CONTEXT.md` Phase 6 notes
+- [x] Client Show page displays real seeded invoice data (Northwind's 4 demo invoices)
+      via the existing `invoices` relationship — full Invoice CRUD UI is Phase 7
+- [ ] **You run:** visit `/clients`, search, create a new client, open Northwind's
+      seeded clients (Fenwick & Co., Acme Studio, Ridley & Partners) and confirm their
+      invoice history shows correctly, edit a client, and — logged in as a `viewer`
+      role account — confirm the "+ New Client" button and Edit/Delete are hidden
 
 ## Phase 7 — Invoice CRUD
-- [ ] Line items, tax, discount, total calculation
-- [ ] Status transitions: Draft → Sent → Paid → Overdue → Cancelled
-- [ ] Public shareable invoice view (no login required)
+- [x] Line items (dynamic add/remove rows), tax, discount, server-authoritative total
+      calculation (`Invoice::recalculateTotals()` — client-side total shown is a
+      preview only, never trusted for the saved amount)
+- [x] Status transitions as separate endpoints (send/mark-paid/cancel), each with its
+      own `InvoicePolicy` rule and its own "which prior status is this valid from" check
+- [x] `effectiveStatus()` shows "Overdue" for a `sent` invoice past its due date without
+      needing a scheduled job yet (a good later addition — see the method's docblock)
+- [x] Public shareable invoice view — `public_token` (UUID, not the sequential ID) as
+      the route key, no login required, no tenant.auth
+- [x] Only `draft` invoices are editable/deletable — enforced in the controller
+      (not just the policy), since "can this role edit invoices" and "can THIS invoice
+      currently be edited" are different questions
+- [ ] **You run:** create a new invoice with 2-3 line items, confirm the total is
+      correct, mark it sent, open its public link in an incognito window (should work
+      without login), mark it paid, then confirm you can no longer edit or delete it
+      (try visiting `/invoices/{id}/edit` directly — should redirect with an error)
 
 ## Phase 8 — PDF
 - [ ] `barryvdh/laravel-dompdf` invoice PDF + download route

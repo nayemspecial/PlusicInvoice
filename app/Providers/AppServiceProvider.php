@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Tenants\Client;
+use App\Models\Tenants\Invoice;
 use App\Models\Tenants\User as TenantUser;
+use App\Policies\Tenants\ClientPolicy;
+use App\Policies\Tenants\InvoicePolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +31,18 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureTenantGates();
+        $this->configureTenantPolicies();
+    }
+
+    /**
+     * Explicit backup registration — Laravel's policy auto-discovery SHOULD find
+     * App\Policies\Tenants\ClientPolicy from App\Models\Tenants\Client's namespace
+     * automatically, but registering it here removes any doubt.
+     */
+    protected function configureTenantPolicies(): void
+    {
+        Gate::policy(Client::class, ClientPolicy::class);
+        Gate::policy(Invoice::class, InvoicePolicy::class);
     }
 
     /**

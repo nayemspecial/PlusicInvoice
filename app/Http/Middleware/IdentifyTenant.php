@@ -45,6 +45,14 @@ class IdentifyTenant
 
             app()->instance('currentTenant', $tenant);
 
+            // Makes $request->user(), Auth::user(), Gate::authorize(),
+            // $this->authorize() in controllers, and policy classes all resolve
+            // against the TENANT guard automatically, without needing to remember
+            // to write guard('tenant') everywhere. Central routes (no tenant
+            // resolved — this whole if-block skipped) keep the normal 'web' default.
+            // This is scoped to config(), which only lives for this one request.
+            config(['auth.defaults.guard' => 'tenant']);
+
             Inertia::share([
                 'auth' => ['user' => Auth::guard('tenant')->user()],
                 'currentTenant' => $tenant->only(['name', 'subdomain']),
