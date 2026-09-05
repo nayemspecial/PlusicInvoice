@@ -17,7 +17,7 @@ const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard', available: true },
     { label: 'Invoices', href: '/invoices', icon: 'invoices', available: true },
     { label: 'Clients', href: '/clients', icon: 'clients', available: true },
-    { label: 'Billing', href: '/billing', icon: 'billing', available: false },
+    { label: 'Billing', href: '/billing', icon: 'billing', available: true, ownerOnly: true },
     { label: 'Team', href: '/team', icon: 'team', available: true, ownerOnly: true },
     { label: 'Settings', href: '/settings', icon: 'settings', available: false },
 ];

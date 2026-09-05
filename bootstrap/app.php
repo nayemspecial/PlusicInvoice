@@ -45,6 +45,13 @@ return Application::configure(basePath: dirname(__DIR__))
             before: \Illuminate\Routing\Middleware\SubstituteBindings::class,
             prepend: \App\Http\Middleware\IdentifyTenant::class,
         );
+
+        // Stripe's servers POST here directly and can't send a Laravel CSRF token —
+        // signature verification inside StripeWebhookController (Webhook::constructEvent())
+        // is what actually secures this endpoint instead.
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/stripe',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

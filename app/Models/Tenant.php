@@ -35,4 +35,19 @@ class Tenant extends Model
     {
         return $this->hasOne(Subscription::class);
     }
+
+    /**
+     * Every tenant is treated as being on (at least) Starter, even before they ever
+     * complete a Stripe checkout — a freshly provisioned tenant has no Subscription
+     * row yet, but still needs SOME plan limits enforced (see InvoiceController's
+     * feature-gating check) rather than being treated as unlimited by omission.
+     */
+    public function currentPlan(): ?Plan
+    {
+        if ($this->subscription && $this->subscription->isActive()) {
+            return $this->subscription->plan;
+        }
+
+        return Plan::where('slug', 'starter')->first();
+    }
 }

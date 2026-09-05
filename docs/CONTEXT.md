@@ -186,6 +186,28 @@ Seeded tenants and numbers are taken directly from `design_references/dashboard.
   if you ever add another place that creates an `Invoice`, set `public_token` there too
   rather than assuming the model event covers it.
 
+## Phase 10 additions (Stripe — raw SDK, no Cashier)
+- **Checkout vs. webhook split, deliberate:** `BillingController::checkout()` creates a
+  Stripe Checkout Session and redirects — it does NOT write to the `subscriptions`
+  table. Only `StripeWebhookController` does that, after Stripe's signature-verified
+  webhook confirms payment. Trusting Stripe's `success_url` redirect as "payment
+  succeeded" would be spoofable (anyone could visit that URL without ever paying);
+  the webhook is the only trustworthy source of truth.
+- **Webhook route is CENTRAL**, sitting entirely outside the `tenant` middleware group
+  in `routes/web.php` — Stripe's server has no concept of our tenant subdomains, and
+  the controller queries `App\Models\Subscription`/`WebhookEvent` (central models) on
+  the default connection, never switching to a tenant DB.
+- Tenant association happens via **Stripe Checkout Session metadata**
+  (`tenant_id`, `plan_id`), set at checkout-creation time and read back in the webhook
+  handler — this is the ONLY link between a Stripe event and our tenant, since nothing
+  else in a webhook payload identifies "which tenant" on its own.
+- CSRF exemption for `webhooks/stripe` in `bootstrap/app.php` — signature verification
+  (`Webhook::constructEvent()`) is the real security boundary for this endpoint, CSRF
+  tokens don't apply to server-to-server webhook calls.
+- `Tenant::currentPlan()` treats every tenant as being on (at least) Starter even
+  before their first successful checkout — avoids a null-plan edge case where
+  feature-gating code would need special-casing for "hasn't subscribed yet".
+
 ## Backend conventions
 - Money stored as decimal(10,2), currency as a 3-letter string column (`USD` default).
 - Every tenant-scoped model uses `protected $connection = 'tenant';` — copy an existing one

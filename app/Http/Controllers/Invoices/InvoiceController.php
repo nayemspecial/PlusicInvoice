@@ -62,6 +62,10 @@ class InvoiceController extends Controller
     {
         $this->authorize('create', Invoice::class);
 
+        if ($limitError = $this->checkInvoiceLimit()) {
+            return back()->withErrors(['plan' => $limitError]);
+        }
+
         $validated = $this->validateInvoice($request);
 
         $invoice = DB::connection('tenant')->transaction(function () use ($validated, $request) {
@@ -237,6 +241,32 @@ class InvoiceController extends Controller
         $invoice->update(['status' => 'cancelled']);
 
         return back()->with('status', 'Invoice cancelled.');
+    }
+
+    /**
+     * Plan-based feature gating (Phase 10). null invoice_limit means unlimited (Pro/
+     * Business) — see Plan model / PlanSeeder. A null-safe check: if there's somehow
+     * no plan at all (shouldn't happen — Tenant::currentPlan() always falls back to
+     * Starter), we fail OPEN (allow creation) rather than blocking legitimate use over
+     * a data problem that isn't the tenant's fault.
+     */
+    protected function checkInvoiceLimit(): ?string
+    {
+        $plan = app('currentTenant')->currentPlan();
+
+        if (! $plan || $plan->invoice_limit === null) {
+            return null;
+        }
+
+        $countThisMonth = Invoice::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->count();
+
+        if ($countThisMonth >= $plan->invoice_limit) {
+            return "You've reached the {$plan->name} plan's limit of {$plan->invoice_limit} invoices this month. Upgrade to create more.";
+        }
+
+        return null;
     }
 
     /**

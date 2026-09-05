@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Billing\BillingController;
+use App\Http\Controllers\Billing\StripeWebhookController;
 use App\Http\Controllers\Clients\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Invoices\InvoiceController;
@@ -14,6 +16,12 @@ use Illuminate\Support\Facades\Route;
 
 // Central marketing/landing page — no tenant middleware, runs on the 'web' guard.
 Route::inertia('/', 'Welcome')->name('home');
+
+// CENTRAL — Stripe posts here directly; there is no tenant subdomain in play, and
+// this must NOT sit behind 'tenant' middleware (Stripe's request wouldn't resolve to
+// any tenant's subdomain) or CSRF protection (see bootstrap/app.php's
+// validateCsrfTokens except list — Stripe can't send a Laravel CSRF token).
+Route::post('webhooks/stripe', [StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
 
 /*
 |--------------------------------------------------------------------------
@@ -80,11 +88,22 @@ Route::middleware('tenant')->group(function (): void {
 
         // Owner-only — 'role:owner' aborts with a 403 for anyone else before the
         // controller even runs. See EnsureUserHasRole.
-        Route::middleware('role:owner')->prefix('team')->name('team.')->group(function (): void {
-            Route::get('/', [TeamController::class, 'index'])->name('index');
-            Route::post('invite', [TeamController::class, 'invite'])->name('invite');
-            Route::delete('invitations/{invitation}', [TeamController::class, 'revokeInvitation'])->name('invitations.revoke');
-            Route::patch('members/{user}/role', [TeamController::class, 'updateRole'])->name('members.role');
+        Route::middleware('role:owner')->group(function (): void {
+            Route::prefix('team')->name('team.')->group(function (): void {
+                Route::get('/', [TeamController::class, 'index'])->name('index');
+                Route::post('invite', [TeamController::class, 'invite'])->name('invite');
+                Route::delete('invitations/{invitation}', [TeamController::class, 'revokeInvitation'])->name('invitations.revoke');
+                Route::patch('members/{user}/role', [TeamController::class, 'updateRole'])->name('members.role');
+            });
+
+            // Plan/Subscription records live in the CENTRAL database — see
+            // BillingController's docblock. Owner-only because billing is
+            // financially sensitive; an admin/accountant/viewer never reaches this.
+            Route::prefix('billing')->name('billing.')->group(function (): void {
+                Route::get('/', [BillingController::class, 'index'])->name('index');
+                Route::post('checkout/{plan}', [BillingController::class, 'checkout'])->name('checkout');
+                Route::post('portal', [BillingController::class, 'portal'])->name('portal');
+            });
         });
     });
 });

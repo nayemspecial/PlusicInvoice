@@ -166,6 +166,34 @@ owner is `owner@northwind.test` / `password`).
 - [ ] Webhook endpoint + signature verification + idempotency via `webhook_events`
 - [ ] Plan-based feature gating
 
+## Phase 10 — Stripe (raw SDK)
+- [x] Checkout session creation (`BillingController::checkout()`) — subscription
+      NOT created here, only after the webhook confirms payment (spoofable redirect
+      vs. signature-verified webhook — see the method's docblock)
+- [x] Webhook endpoint (CENTRAL, not tenant-scoped) with signature verification +
+      idempotency via `webhook_events`, handling `checkout.session.completed`,
+      `customer.subscription.updated`, `customer.subscription.deleted`
+- [x] Stripe Billing Portal integration (manage card/cancel — no custom UI needed)
+- [x] Plan-based feature gating: `Tenant::currentPlan()` (falls back to Starter for
+      un-provisioned subscriptions), invoice-limit check in `InvoiceController::store()`
+- [x] Webhook route excluded from CSRF verification (`bootstrap/app.php`) — Stripe
+      can't send a Laravel CSRF token, signature verification replaces it
+- [ ] **You run:** `composer require stripe/stripe-php`, then:
+      1. Create a free Stripe account (test mode), get your test Secret/Publishable
+         keys from the Stripe Dashboard, put them in `.env` (`STRIPE_KEY`, `STRIPE_SECRET`)
+      2. In the Stripe Dashboard, create 3 test Products/Prices matching Starter/Pro/
+         Business, then update each `Plan` row's `stripe_price_id` (via `php artisan tinker`
+         or a quick seeder tweak) with the real test price IDs
+      3. Install the Stripe CLI, run `stripe listen --forward-to
+         localhost:9800/webhooks/stripe` — it prints a webhook signing secret, put
+         that in `STRIPE_WEBHOOK_SECRET`
+      4. Visit `/billing` as an owner, click "Choose plan" on Pro, complete Stripe's
+         test checkout (card `4242 4242 4242 4242`, any future date/CVC) — confirm the
+         `stripe listen` terminal shows the webhook firing and `/billing` (after a
+         refresh) shows Pro as your current plan
+      5. Create invoices past Starter's 20/month limit on a DIFFERENT un-upgraded
+         tenant (Fenwick or Acme) and confirm the plan-limit error appears
+
 ## Phase 11 — Dashboard
 - [ ] Stats cards, revenue chart, recent invoices — matching `design_references/dashboard.html`
 
