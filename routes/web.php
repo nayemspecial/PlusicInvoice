@@ -55,6 +55,7 @@ Route::middleware('tenant')->group(function (): void {
     // Public, no-login invoice view — reached via the invoice's public_token (UUID),
     // not its sequential ID, so it can't be guessed. No 'tenant.auth' here on purpose.
     Route::get('pay/{invoice:public_token}', [InvoicePublicController::class, 'show'])->name('invoices.public');
+    Route::get('pay/{invoice:public_token}/pdf', [InvoicePublicController::class, 'pdf'])->name('invoices.public.pdf');
 
     // Requires a logged-in tenant user. Custom middleware (not Laravel's 'auth' alias)
     // — see EnsureTenantUserIsAuthenticated for why.
@@ -72,6 +73,7 @@ Route::middleware('tenant')->group(function (): void {
         // Same pattern as clients: viewAny/view open to all tenant users, finer
         // create/update/delete rules live in InvoicePolicy, not route middleware.
         Route::resource('invoices', InvoiceController::class);
+        Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
         Route::patch('invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');
         Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
         Route::patch('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');

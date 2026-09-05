@@ -120,6 +120,12 @@ const destroy = () => {
             <div class="space-y-4 h-fit">
                 <div class="bg-card border border-border rounded-2xl p-5 space-y-2.5">
                     <h3 class="text-[13.5px] font-bold text-ink mb-1">Actions</h3>
+                    <a
+                        :href="`/invoices/${invoice.id}/pdf`"
+                        class="block w-full text-center border border-border text-ink font-semibold text-[13px] rounded-xl py-2.5 hover:bg-canvas transition"
+                    >
+                        Download PDF
+                    </a>
                     <button v-if="can.send" @click="send" class="w-full bg-primary text-white font-semibold text-[13px] rounded-xl py-2.5">
                         Mark as sent
                     </button>

@@ -85,6 +85,30 @@ Seeded tenants and numbers are taken directly from `design_references/dashboard.
   only needs hosts-file entries (or `*.localhost`, which modern browsers resolve to 127.0.0.1
   automatically — no hosts file needed at all), not a real web server / virtual host config.
 
+## Phase 7 follow-up bug: route-model-binding on GET /invoices/{invoice}
+- Even with `IdentifyTenant` global (Phase 5 fix), it was registered via
+  `$middleware->web(append: [...])` — 'append' only orders it relative to OUR OTHER
+  custom middleware, not relative to Laravel's OWN built-in 'web' group middleware.
+  `SubstituteBindings` (resolves `{invoice}`/`{client}` route parameters) is one of
+  Laravel's default 'web' group entries AND is genuinely in the framework's
+  `$middlewarePriority` list — so in the natural (unsorted) order it sat BEFORE our
+  appended `IdentifyTenant`, meaning any route with a bound model parameter tried to
+  query it before the tenant connection was switched. Symptom: the same
+  `unset_tenant_connection` error, this time on `GET /invoices/{id}`.
+- **Fix:** `$middleware->prependToPriorityList(before: SubstituteBindings::class,
+  prepend: IdentifyTenant::class)` in `bootstrap/app.php`. Unlike two EARLIER failed
+  attempts at this kind of fix (which targeted `HandleInertiaRequests` — not actually
+  priority-listed — causing unpredictable results), `SubstituteBindings` genuinely IS
+  in Laravel's default priority array, so this specific call is well-defined and
+  reliable. Since `StartSession` is already positioned before `SubstituteBindings` in
+  Laravel's own list, this places `IdentifyTenant` correctly between them: after
+  session start, before any route-model-binding resolution.
+- **Lesson, restated:** 'append'/'prepend' on a middleware GROUP only controls order
+  relative to other entries explicitly added to that SAME group call — it says nothing
+  about order relative to the framework's own built-in group members. Any custom
+  middleware that must run before/after a specific Laravel built-in needs an explicit
+  priority-list statement naming that built-in, not just append/prepend positioning.
+
 ## Phase 5 additions (role-based access + team invites)
 - Two authorization mechanisms, used for different situations — both are Laravel
   primitives, no package: **`role:owner` route middleware** (`EnsureUserHasRole`) for
@@ -150,6 +174,17 @@ Seeded tenants and numbers are taken directly from `design_references/dashboard.
   race-condition-safe under heavy concurrent creation — a known, documented trade-off
   acceptable at this project's scale. A production system at higher volume would use a
   DB-level sequence or a locking transaction instead.
+
+## public_token bug (defensive fix)
+- The `Invoice` model's `booted()` `creating` event was meant to auto-generate
+  `public_token` for every invoice, but in practice a `migrate:fresh --seed` run
+  produced an INSERT with no `public_token` value at all — the model event didn't
+  reliably fire before the insert in that path. Root cause not fully confirmed; rather
+  than keep chasing it, `public_token` is now set EXPLICITLY wherever an invoice is
+  created (`TenantDatabaseSeeder::makeInvoice()`, `InvoiceFactory::definition()`,
+  `InvoiceController::store()`), in addition to the model hook. Belt-and-suspenders —
+  if you ever add another place that creates an `Invoice`, set `public_token` there too
+  rather than assuming the model event covers it.
 
 ## Backend conventions
 - Money stored as decimal(10,2), currency as a 3-letter string column (`USD` default).

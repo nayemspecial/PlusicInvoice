@@ -5,6 +5,7 @@ namespace Database\Factories\Tenants;
 use App\Models\Tenants\Client;
 use App\Models\Tenants\Invoice;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Invoice>
@@ -20,6 +21,7 @@ class InvoiceFactory extends Factory
 
         return [
             'invoice_number' => 'INV-'.fake()->unique()->numerify('####'),
+            'public_token' => (string) Str::uuid(),
             'client_id' => Client::factory(),
             'status' => fake()->randomElement(['draft', 'sent', 'paid', 'overdue']),
             'issue_date' => fake()->dateTimeBetween('-2 months', 'now'),

@@ -9,6 +9,7 @@ interface InvoiceItem {
     line_total: string;
 }
 interface InvoiceData {
+    public_token: string;
     invoice_number: string;
     status: string;
     issue_date: string;
@@ -89,6 +90,13 @@ const statusStyle: Record<string, string> = {
                 </div>
 
                 <p v-if="invoice.notes" class="mt-6 text-[13px] text-muted border-t border-border pt-4">{{ invoice.notes }}</p>
+
+                <a
+                    :href="`/pay/${invoice.public_token}/pdf`"
+                    class="block w-full text-center border border-border text-ink font-semibold text-[13px] rounded-xl py-2.5 mt-6 hover:bg-canvas transition"
+                >
+                    Download PDF
+                </a>
             </div>
 
             <p class="text-center text-[11.5px] text-muted mt-6">

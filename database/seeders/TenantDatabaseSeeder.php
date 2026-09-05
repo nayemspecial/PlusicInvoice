@@ -10,6 +10,7 @@ use App\Models\Tenants\User;
 use App\Services\TenantProvisioningService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * Seeds ONE tenant's own database with demo data. Always call
@@ -105,6 +106,7 @@ class TenantDatabaseSeeder extends Seeder
 
         $invoice = Invoice::create([
             'invoice_number' => $number,
+            'public_token' => (string) Str::uuid(),
             'client_id' => $client->id,
             'status' => $status,
             'issue_date' => now()->subDays(random_int(3, 20)),

@@ -133,8 +133,33 @@ owner is `owner@northwind.test` / `password`).
 ## Phase 8 — PDF
 - [ ] `barryvdh/laravel-dompdf` invoice PDF + download route
 
+## Phase 8 — PDF
+- [x] `barryvdh/laravel-dompdf` — invoice PDF via a table-based Blade template
+      (dompdf has weak CSS support — no flexbox/grid — so tables are the standard,
+      reliable approach for this library, not a stylistic choice)
+- [x] Download route for authenticated users AND for the public (no-login) invoice page
+- [ ] **You run:** `composer require barryvdh/laravel-dompdf` locally, replace files,
+      then download a PDF both from `/invoices/{id}` (logged in) and from the public
+      `/pay/{token}` page (logged out) — confirm both produce a correctly formatted PDF
+
 ## Phase 9 — Email
 - [ ] Queued invoice-sent email
+
+## Phase 9 — Email
+- [x] `InvoiceSentMail` — `implements ShouldQueue`, sent via `->queue()` (not `->send()`)
+      when an invoice is marked sent, with the PDF attached and a link to the public
+      invoice page
+- [x] PDF is rendered INSIDE the queued job (`build()`), not passed in from the
+      controller — keeps binary data out of the serialized queue payload
+- [x] Handles clients with no email on file (skips sending, tells you in the flash
+      message instead of silently failing or crashing)
+- [ ] **You run:** `QUEUE_CONNECTION=database` means queued jobs sit in the `jobs`
+      table until a worker processes them — they will NOT send automatically just by
+      clicking "Mark as sent". Either run `php artisan queue:work` in a separate
+      terminal before testing, or temporarily set `QUEUE_CONNECTION=sync` in `.env`
+      for immediate (non-queued) sending while testing locally. Mark an invoice sent,
+      then check `storage/logs/laravel.log` for the email (MAIL_MAILER=log) — confirm
+      the PDF attachment is mentioned and the "View invoice" link works
 
 ## Phase 10 — Stripe (raw SDK)
 - [ ] Checkout session creation

@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Invoices;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InvoiceSentMail;
 use App\Models\Tenants\Client;
 use App\Models\Tenants\Invoice;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class InvoiceController extends Controller
 {
@@ -63,6 +67,7 @@ class InvoiceController extends Controller
         $invoice = DB::connection('tenant')->transaction(function () use ($validated, $request) {
             $invoice = Invoice::create([
                 'invoice_number' => Invoice::nextInvoiceNumber(),
+                'public_token' => (string) \Illuminate\Support\Str::uuid(),
                 'client_id' => $validated['client_id'],
                 'status' => 'draft',
                 'issue_date' => $validated['issue_date'],
@@ -101,6 +106,18 @@ class InvoiceController extends Controller
                 'cancel' => $request->user()->can('cancel', $invoice) && in_array($invoice->status, ['draft', 'sent'], true),
             ],
         ]);
+    }
+
+    public function pdf(Invoice $invoice): HttpResponse
+    {
+        $this->authorize('view', $invoice);
+
+        $invoice->load(['client', 'items']);
+
+        return Pdf::loadView('pdfs.invoice', [
+            'invoice' => $invoice,
+            'tenantName' => app('currentTenant')->name,
+        ])->download("{$invoice->invoice_number}.pdf");
     }
 
     public function edit(Request $request, Invoice $invoice): Response|RedirectResponse
@@ -181,7 +198,19 @@ class InvoiceController extends Controller
 
         $invoice->update(['status' => 'sent']);
 
-        return back()->with('status', 'Invoice marked as sent.');
+        $invoice->load('client');
+
+        if (blank($invoice->client->email)) {
+            return back()->with('status', 'Invoice marked as sent — add an email to this client to also email them a copy.');
+        }
+
+        Mail::to($invoice->client->email)->queue(new InvoiceSentMail(
+            $invoice,
+            app('currentTenant'),
+            route('invoices.public', $invoice->public_token),
+        ));
+
+        return back()->with('status', 'Invoice marked as sent and emailed to the client.');
     }
 
     public function markAsPaid(Request $request, Invoice $invoice): RedirectResponse
