@@ -133,7 +133,7 @@ const logout = () => router.post('/logout');
                 </div>
             </header>
 
-            <main class="flex-1 p-5 lg:p-9">
+            <main class="flex-1 p-3 lg:p-5">
                 <div
                     v-if="page.props.flash?.status"
                     class="mb-6 text-[13px] font-medium text-mint-strong bg-mint border border-mint-strong/30 rounded-xl px-4 py-3"

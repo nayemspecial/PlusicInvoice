@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Invoices;
 
 use App\Http\Controllers\Controller;
 use App\Mail\InvoiceSentMail;
+use App\Models\Tenants\ActivityLog;
 use App\Models\Tenants\Client;
 use App\Models\Tenants\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -90,6 +91,8 @@ class InvoiceController extends Controller
 
             return $invoice;
         });
+
+        ActivityLog::record('invoice.created', $invoice, $request->user()->id);
 
         return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice created as draft.');
     }
@@ -202,6 +205,8 @@ class InvoiceController extends Controller
 
         $invoice->update(['status' => 'sent']);
 
+        ActivityLog::record('invoice.sent', $invoice, $request->user()->id);
+
         $invoice->load('client');
 
         if (blank($invoice->client->email)) {
@@ -227,6 +232,8 @@ class InvoiceController extends Controller
 
         $invoice->update(['status' => 'paid']);
 
+        ActivityLog::record('invoice.paid', $invoice, $request->user()->id);
+
         return back()->with('status', 'Invoice marked as paid.');
     }
 
@@ -239,6 +246,8 @@ class InvoiceController extends Controller
         }
 
         $invoice->update(['status' => 'cancelled']);
+
+        ActivityLog::record('invoice.cancelled', $invoice, $request->user()->id);
 
         return back()->with('status', 'Invoice cancelled.');
     }

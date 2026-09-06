@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Team;
 
 use App\Http\Controllers\Controller;
 use App\Mail\TeamInvitationMail;
+use App\Models\Tenants\ActivityLog;
 use App\Models\Tenants\Invitation;
 use App\Models\Tenants\User;
 use Illuminate\Http\RedirectResponse;
@@ -63,6 +64,8 @@ class TeamController extends Controller
         Mail::to($invitation->email)->send(
             new TeamInvitationMail($invitation, app('currentTenant'), $signedUrl)
         );
+
+        ActivityLog::record('team.invited', $invitation, $request->user()->id);
 
         return back()->with('status', "Invitation sent to {$invitation->email}.");
     }

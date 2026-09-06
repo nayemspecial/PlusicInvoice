@@ -208,6 +208,20 @@ Seeded tenants and numbers are taken directly from `design_references/dashboard.
   before their first successful checkout — avoids a null-plan edge case where
   feature-gating code would need special-casing for "hasn't subscribed yet".
 
+## Phase 11 additions (Dashboard)
+- `ActivityLog` (its model + static `record()` helper existed since Phase 2 but was
+  never called) is now wired into `ClientController::store()` and every
+  `InvoiceController` status-transition method, plus `TeamController::invite()`. If you
+  add a new action worth showing on the dashboard's "Recent Activity" panel later,
+  call `ActivityLog::record('your.action', $subject, $request->user()->id)` there too.
+- Several dashboard metrics are DOCUMENTED APPROXIMATIONS given our current schema —
+  see `DashboardController`'s inline comments. Notably: "paid this month" and the
+  revenue chart use `updated_at` as a stand-in for "when it was paid" (no dedicated
+  `paid_at` column exists), and "collection score" can't know whether a now-paid
+  invoice was EVER overdue before settling (status overwrites itself, no history
+  table). Both are reasonable trade-offs for this project's scope, and good
+  "what would you improve" interview answers.
+
 ## Backend conventions
 - Money stored as decimal(10,2), currency as a 3-letter string column (`USD` default).
 - Every tenant-scoped model uses `protected $connection = 'tenant';` — copy an existing one

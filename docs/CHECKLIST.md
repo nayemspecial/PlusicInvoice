@@ -197,6 +197,21 @@ owner is `owner@northwind.test` / `password`).
 ## Phase 11 — Dashboard
 - [ ] Stats cards, revenue chart, recent invoices — matching `design_references/dashboard.html`
 
+## Phase 11 — Dashboard
+- [x] Every number computed live from real Invoice/Client/Subscription data — no fake
+      display values (a few metrics documented as approximations — see
+      `DashboardController`'s comments, e.g. "paid this month" uses `updated_at` since
+      there's no dedicated `paid_at` column)
+- [x] Wired up `ActivityLog` (built in Phase 2, unused until now) — client creation,
+      every invoice status transition, and team invites all log an entry, shown in the
+      new "Recent Activity" panel
+- [x] Revenue chart, invoice-status donut, collection score, plan usage (real seat
+      count via `DB::connection('tenant')->table('users')->count()`), recent invoices
+- [ ] **You run:** as Northwind's owner, confirm the dashboard numbers roughly match
+      what you'd expect from the seeded invoices; create a new client and a new
+      invoice, mark it sent then paid, and confirm both the stats AND the Recent
+      Activity panel update to reflect it
+
 ## Phase 12 — Settings
 - [ ] Branding, currency, tax rate, invoice number format
 

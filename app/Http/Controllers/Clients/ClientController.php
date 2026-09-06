@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Clients;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenants\ActivityLog;
 use App\Models\Tenants\Client;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -50,7 +51,9 @@ class ClientController extends Controller
 
         $validated = $this->validated($request);
 
-        Client::create($validated);
+        $client = Client::create($validated);
+
+        ActivityLog::record('client.created', $client, $request->user()->id);
 
         return redirect()->route('clients.index')->with('status', 'Client added.');
     }
