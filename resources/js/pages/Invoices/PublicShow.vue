@@ -27,6 +27,7 @@ interface InvoiceData {
 defineProps<{
     invoice: InvoiceData;
     tenantName: string;
+    footerNote: string | null;
 }>();
 
 const statusStyle: Record<string, string> = {
@@ -99,7 +100,8 @@ const statusStyle: Record<string, string> = {
                 </a>
             </div>
 
-            <p class="text-center text-[11.5px] text-muted mt-6">
+            <p v-if="footerNote" class="text-center text-[12px] text-muted mt-6">{{ footerNote }}</p>
+            <p class="text-center text-[11.5px] text-muted mt-2">
                 Online payment coming soon — please contact {{ tenantName }} directly to settle this invoice.
             </p>
         </div>

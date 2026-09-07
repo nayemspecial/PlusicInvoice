@@ -10,6 +10,7 @@ use App\Http\Controllers\Clients\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Invoices\InvoiceController;
 use App\Http\Controllers\Invoices\InvoicePublicController;
+use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Team\AcceptInvitationController;
 use App\Http\Controllers\Team\TeamController;
 use Illuminate\Support\Facades\Route;
@@ -103,6 +104,11 @@ Route::middleware('tenant')->group(function (): void {
                 Route::get('/', [BillingController::class, 'index'])->name('index');
                 Route::post('checkout/{plan}', [BillingController::class, 'checkout'])->name('checkout');
                 Route::post('portal', [BillingController::class, 'portal'])->name('portal');
+            });
+
+            Route::prefix('settings')->name('settings.')->group(function (): void {
+                Route::get('/', [SettingsController::class, 'index'])->name('index');
+                Route::put('/', [SettingsController::class, 'update']);
             });
         });
     });

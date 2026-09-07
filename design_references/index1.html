@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PlusicInvoice — Your billing assistant, powered by clarity</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,wght@1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBF7EC; --card:#FFFFFF; --border:#EFE7D6;
+    --ink:#271A4D; --muted:#5F5578;
+    --yellow:#F5C544; --pink:#F3A9C6; --pink-text:#B23E77;
+    --blue:#4C7EF0; --mint:#3FAE6A;
+    --lavender:#E7E1FA; --peach:#FBE6D8; --rose:#FBE0E4; --sage:#DDF0E2;
+  }
+  *{ font-family:'Plus Jakarta Sans', sans-serif; }
+  .font-mono{ font-family:'IBM Plex Mono', monospace; }
+  .font-accent{ font-family:'Newsreader', serif; font-style:italic; }
+  body{ background:var(--bg); color:var(--ink); font-size:15px; line-height:1.6; }
+  .section-container{ max-width:1280px; margin:0 auto; padding-left:1.5rem; padding-right:1.5rem; }
+  @media(min-width:1024px){ .section-container{ padding-left:2.5rem; padding-right:2.5rem; } }
+
+  .btn-primary{ background:var(--yellow); color:var(--ink); transition:.2s ease; }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(245,197,68,.45); }
+  .btn-outline{ transition:.2s ease; }
+  .btn-outline:hover{ background:var(--ink); color:#fff; transform:translateY(-2px); }
+  .btn-fixed{ height:46px; display:inline-flex; align-items:center; justify-content:center; padding:0 22px; box-sizing:border-box; }
+
+  .hover-card{ transition:.25s ease; }
+  .hover-card:hover{ transform:translateY(-4px); box-shadow:0 14px 28px rgba(39,26,77,.10); }
+  .hover-link{ transition:.2s ease; }
+  .hover-link:hover{ color:var(--ink); }
+
+  .reveal{ opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s ease; }
+  .reveal.visible{ opacity:1; transform:translateY(0); }
+
+  .corner-shape{ position:absolute; top:-38px; right:-38px; width:120px; height:120px; border-radius:9999px; filter:blur(18px); pointer-events:none; z-index:0; }
+  .card-inner{ position:relative; z-index:1; }
+
+  details summary::-webkit-details-marker{ display:none; }
+  .t-fade{ transition:opacity .35s ease, transform .35s ease; }
+  .section-container img{
+    object-fit: cover;
+  }
+</style>
+</head>
+<body class="antialiased">
+
+  <header class="section-container py-6 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center font-extrabold text-[13px] text-white" style="background:var(--ink)">P</div>
+      <span class="font-extrabold text-[17px]">PlusicInvoice</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-8 text-[13.5px] font-semibold" style="color:var(--muted)">
+      <a href="#features" class="hover-link">Features</a>
+      <a href="#pricing" class="hover-link">Pricing</a>
+      <a href="#reviews" class="hover-link">Reviews</a>
+      <a href="#" class="hover-link">Contact us</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="#" class="btn-primary btn-fixed text-[13.5px] font-bold rounded-full">Get Started Free</a>
+      <a href="#" class="btn-outline btn-fixed text-[13.5px] font-bold rounded-full border-2" style="border-color:var(--ink)">Sign In</a>
+    </div>
+  </header>
+
+  <section class="section-container pt-6 lg:pt-10 pb-4 text-center reveal">
+    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold" style="background:var(--pink); color:var(--pink-text)">SAAS-POWERED</span>
+    <span class="ml-2 text-[11.5px] font-semibold" style="color:var(--muted)">Multi-tenant invoicing</span>
+
+    <h1 class="font-extrabold text-[34px] sm:text-[46px] lg:text-[56px] leading-[1.1] mt-5 max-w-3xl mx-auto tracking-tight">
+      Your billing assistant<span class="block"><span class="font-accent font-medium">— powered by</span> clarity.</span>
+    </h1>
+    <p class="mt-5 text-[16px] lg:text-[17px] leading-relaxed max-w-lg mx-auto" style="color:var(--muted)">
+      Let PlusicInvoice track, send, and collect — so every client stays
+      in their own ledger, and you spend less time chasing payments.
+    </p>
+    <div class="mt-7 flex items-center justify-center gap-3">
+      <a href="#" class="btn-primary btn-fixed text-[14px] font-bold rounded-full">Get Started Free</a>
+      <a href="#" class="btn-fixed text-[14px] font-bold rounded-full transition hover:opacity-85" style="background:var(--ink); color:#fff">See Our Pricing</a>
+    </div>
+
+    <div class="section-container my-12 rounded-2xl border hover-card" style="border-color:var(--border)">
+      <img src="images/dashboard.png" alt="">
+    </div>
+
+    <p class="text-[11.5px] font-semibold mt-8" style="color:var(--muted)">Relied upon by agencies who bill across the world</p>
+    <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 mt-4 text-[15px] font-extrabold" style="color:#D8CFAF">
+      <span class="hover:text-[var(--muted)] transition cursor-default">Northwind</span>
+      <span class="hover:text-[var(--muted)] transition cursor-default">Fenwick &amp; Co.</span>
+      <span class="hover:text-[var(--muted)] transition cursor-default">Acme Studio</span>
+      <span class="hover:text-[var(--muted)] transition cursor-default">Ridley &amp; Partners</span>
+      <span class="hover:text-[var(--muted)] transition cursor-default">Harborline</span>
+    </div>
+  </section>
+
+  <section class="section-container mt-14 reveal">
+    <div class="rounded-2xl grid grid-cols-2 lg:grid-cols-4 divide-x" style="background:var(--ink); border-color:#382A63">
+      <div class="px-6 py-8 text-center transition hover:bg-white/5" style="border-color:#382A63">
+        <p class="font-mono text-[26px] font-extrabold" style="color:var(--yellow)">04+</p>
+        <p class="text-[11px] font-semibold mt-1 uppercase tracking-wide" style="color:#B4A9DB">Years experience</p>
+      </div>
+      <div class="px-6 py-8 text-center transition hover:bg-white/5" style="border-color:#382A63">
+        <p class="font-mono text-[26px] font-extrabold" style="color:var(--yellow)">500+</p>
+        <p class="text-[11px] font-semibold mt-1 uppercase tracking-wide" style="color:#B4A9DB">Happy agencies</p>
+      </div>
+      <div class="px-6 py-8 text-center border-t lg:border-t-0 transition hover:bg-white/5" style="border-color:#382A63">
+        <p class="font-mono text-[26px] font-extrabold" style="color:var(--yellow)">$2.4M+</p>
+        <p class="text-[11px] font-semibold mt-1 uppercase tracking-wide" style="color:#B4A9DB">Invoiced to date</p>
+      </div>
+      <div class="px-6 py-8 text-center border-t lg:border-t-0 transition hover:bg-white/5" style="border-color:#382A63">
+        <p class="font-mono text-[26px] font-extrabold" style="color:var(--yellow)">92%</p>
+        <p class="text-[11px] font-semibold mt-1 uppercase tracking-wide" style="color:#B4A9DB">On-time collection</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-container py-20 text-center reveal">
+    <h2 class="font-extrabold text-[30px] lg:text-[38px]">Why agencies choose <span class="font-accent">PlusicInvoice</span></h2>
+    <p class="mt-3 max-w-lg mx-auto text-[15px] leading-relaxed" style="color:var(--muted)">Built specifically for teams billing multiple clients — not a spreadsheet with a PDF button bolted on.</p>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12 text-left">
+      <div class="relative overflow-hidden rounded-2xl p-6 hover-card cursor-default" style="background:var(--lavender)">
+        <div class="corner-shape" style="background:#5B3FD1; opacity:.16"></div>
+        <div class="card-inner">
+          <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mb-5">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5B3FD1" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
+          </div>
+          <h3 class="font-bold text-[16px] mb-1.5">Isolated by design</h3>
+          <p class="text-[13.5px] leading-relaxed" style="color:var(--muted)">Every client gets a dedicated database. Nothing ever crosses over.</p>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-2xl p-6 hover-card cursor-default" style="background:var(--peach)">
+        <div class="corner-shape" style="background:#C2731E; opacity:.16"></div>
+        <div class="card-inner">
+          <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mb-5">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C2731E" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
+          </div>
+          <h3 class="font-bold text-[16px] mb-1.5">Stripe billing built in</h3>
+          <p class="text-[13.5px] leading-relaxed" style="color:var(--muted)">Plans, webhooks, and a portal — no payment code of your own.</p>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-2xl p-6 hover-card cursor-default" style="background:var(--rose)">
+        <div class="corner-shape" style="background:#C43E68; opacity:.16"></div>
+        <div class="card-inner">
+          <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mb-5">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C43E68" stroke-width="2"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <h3 class="font-bold text-[16px] mb-1.5">Collection score</h3>
+          <p class="text-[13.5px] leading-relaxed" style="color:var(--muted)">Know exactly which clients to follow up with, before they go quiet.</p>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-2xl p-6 hover-card cursor-default" style="background:var(--sage)">
+        <div class="corner-shape" style="background:#2C8556; opacity:.16"></div>
+        <div class="card-inner">
+          <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mb-5">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2C8556" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <h3 class="font-bold text-[16px] mb-1.5">Role-based team</h3>
+          <p class="text-[13.5px] leading-relaxed" style="color:var(--muted)">Owner, accountant, or view-only — billing stays controlled.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section-container reveal">
+    <div class="rounded-3xl p-8 lg:p-14" style="background:var(--lavender)">
+      <div class="text-center max-w-lg mx-auto">
+        <h2 class="font-extrabold text-[28px] lg:text-[34px]">Get billing in <span class="font-accent">3 simple</span> steps</h2>
+        <p class="mt-3 text-[14.5px] leading-relaxed" style="color:var(--muted)">No onboarding call. No migration headache. Just a subdomain and a plan.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-10 mt-10 items-center">
+        <div class="relative h-[260px]">
+          <div class="absolute left-4 top-4 w-[210px] bg-white rounded-2xl shadow-xl border p-4 hover-card" style="border-color:var(--border)">
+            <p class="text-[10.5px]" style="color:var(--muted)">app.plusicinvoice.com</p>
+            <div class="mt-3 space-y-2">
+              <div class="h-2.5 rounded-full w-3/4" style="background:var(--yellow)"></div>
+              <div class="h-2.5 rounded-full w-1/2" style="background:var(--rose)"></div>
+              <div class="h-2.5 rounded-full w-2/3" style="background:var(--sage)"></div>
+            </div>
+          </div>
+          <div class="absolute right-2 bottom-2 w-[190px] bg-white rounded-2xl shadow-xl border p-4 rotate-3 hover-card" style="border-color:var(--border)">
+            <p class="text-[10.5px]" style="color:var(--muted)">Invoice total</p>
+            <p class="font-mono text-[20px] font-extrabold mt-1">$2,205.00</p>
+          </div>
+        </div>
+
+        <div class="relative pl-10">
+          <div class="absolute left-[15px] top-2 bottom-2 w-px" style="background:#C9BEEE"></div>
+          <div class="relative mb-8">
+            <div class="absolute -left-10 top-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-mono font-bold text-[12px]" style="background:var(--ink)">01</div>
+            <h3 class="font-bold text-[16.5px]">Create your workspace</h3>
+            <p class="text-[13.5px] mt-1.5 leading-relaxed" style="color:var(--muted)">Pick a subdomain and plan — your isolated database provisions automatically.</p>
+          </div>
+          <div class="relative mb-8">
+            <div class="absolute -left-10 top-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-mono font-bold text-[12px]" style="background:var(--ink)">02</div>
+            <h3 class="font-bold text-[16.5px]">Add clients &amp; send invoices</h3>
+            <p class="text-[13.5px] mt-1.5 leading-relaxed" style="color:var(--muted)">Line items, tax, and a payment link — tracked automatically from sent to paid.</p>
+          </div>
+          <div class="relative">
+            <div class="absolute -left-10 top-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-mono font-bold text-[12px]" style="background:var(--ink)">03</div>
+            <h3 class="font-bold text-[16.5px]">Get paid, on time</h3>
+            <p class="text-[13.5px] mt-1.5 leading-relaxed" style="color:var(--muted)">Your collection score flags who to nudge, before an invoice goes overdue.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-container py-20 reveal">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+      <h2 class="font-extrabold text-[28px] lg:text-[34px] max-w-md">Smart features that <span class="font-accent">help you get paid.</span></h2>
+      <p class="text-[14px] leading-relaxed max-w-xs" style="color:var(--muted)">Every workspace ships with the tools your finance workflow actually uses.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-6 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:var(--blue); opacity:.12"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[11px] font-bold" style="color:var(--muted)">001</p>
+          <h3 class="font-bold text-[16px] mt-2 mb-1.5">Recurring invoices</h3>
+          <p class="text-[13.5px] mb-4 leading-relaxed" style="color:var(--muted)">Set it monthly, weekly, or custom — it sends itself.</p>
+          <div class="bg-[var(--bg)] rounded-xl p-3 border" style="border-color:var(--border)">
+            <div class="flex justify-between text-[11px] mb-2"><span>Monthly retainer</span><span class="font-mono font-semibold">$1,240</span></div>
+            <div class="w-full h-1.5 rounded-full bg-white"><div class="h-1.5 rounded-full w-2/3" style="background:var(--blue)"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-6 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:var(--yellow); opacity:.2"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[11px] font-bold" style="color:var(--muted)">002</p>
+          <h3 class="font-bold text-[16px] mt-2 mb-1.5">Branded PDF invoices</h3>
+          <p class="text-[13.5px] mb-4 leading-relaxed" style="color:var(--muted)">Your logo, your colors, your invoice number format.</p>
+          <div class="bg-[var(--bg)] rounded-xl p-3 border flex items-center gap-2" style="border-color:var(--border)">
+            <div class="w-7 h-7 rounded" style="background:var(--yellow)"></div>
+            <div class="text-[11px]"><p class="font-semibold">Northwind Traders</p><p style="color:var(--muted)">INV-2026-0142</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-6 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:var(--mint); opacity:.14"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[11px] font-bold" style="color:var(--muted)">003</p>
+          <h3 class="font-bold text-[16px] mt-2 mb-1.5">Collection score</h3>
+          <p class="text-[13.5px] mb-4 leading-relaxed" style="color:var(--muted)">A single number that tells you who to chase first.</p>
+          <div class="bg-[var(--bg)] rounded-xl p-3 border flex items-center justify-between" style="border-color:var(--border)">
+            <span class="text-[11px]" style="color:var(--muted)">This month</span>
+            <span class="font-mono font-bold text-[15px]" style="color:var(--mint)">92%</span>
+          </div>
+        </div>
+      </div>
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-6 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:#5B3FD1; opacity:.14"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[11px] font-bold" style="color:var(--muted)">004</p>
+          <h3 class="font-bold text-[16px] mt-2 mb-1.5">Team roles</h3>
+          <p class="text-[13.5px] mb-4 leading-relaxed" style="color:var(--muted)">Owner, admin, accountant, or view-only access.</p>
+          <div class="bg-[var(--bg)] rounded-xl p-3 border flex -space-x-2" style="border-color:var(--border)">
+            <div class="w-7 h-7 rounded-full border-2 border-white" style="background:var(--lavender)"></div>
+            <div class="w-7 h-7 rounded-full border-2 border-white" style="background:var(--peach)"></div>
+            <div class="w-7 h-7 rounded-full border-2 border-white" style="background:var(--sage)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-6 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:var(--pink); opacity:.22"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[11px] font-bold" style="color:var(--muted)">005</p>
+          <h3 class="font-bold text-[16px] mt-2 mb-1.5">Public payment link</h3>
+          <p class="text-[13.5px] mb-4 leading-relaxed" style="color:var(--muted)">Clients pay without creating an account or logging in anywhere.</p>
+          <div class="bg-[var(--bg)] rounded-xl p-3 border text-[11px] font-mono truncate" style="border-color:var(--border); color:var(--muted)">plusicinvoice.app/pay/inv-0142</div>
+        </div>
+      </div>
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-6 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:#2C8556; opacity:.13"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[11px] font-bold" style="color:var(--muted)">006</p>
+          <h3 class="font-bold text-[16px] mt-2 mb-1.5">Multi-currency ready</h3>
+          <p class="text-[13.5px] mb-4 leading-relaxed" style="color:var(--muted)">Bill clients in their local currency as your business grows.</p>
+          <div class="bg-[var(--bg)] rounded-xl p-3 border flex gap-2 text-[11px] font-mono" style="border-color:var(--border)">
+            <span class="px-2 py-0.5 rounded bg-white">USD</span><span class="px-2 py-0.5 rounded bg-white">EUR</span><span class="px-2 py-0.5 rounded bg-white">GBP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-container pb-20 reveal">
+    <div class="rounded-3xl p-8 lg:p-12 grid lg:grid-cols-2 gap-10 items-center" style="background:linear-gradient(135deg,#3A2A6B,#241748)">
+      <div class="text-white">
+        <span class="inline-block px-3 py-1 rounded-full text-[10.5px] font-bold mb-4" style="background:var(--pink); color:var(--pink-text)">FOR AGENCIES</span>
+        <h2 class="font-extrabold text-[26px] lg:text-[32px] leading-tight">Choose the workflow that fits your team.</h2>
+        <p class="mt-3 text-[14px] leading-relaxed" style="color:#C6BCE8">No manual spreadsheets. PlusicInvoice tracks every invoice and nudges you before it's overdue.</p>
+        <ul class="mt-6 space-y-2.5 text-[14px]">
+          <li class="flex items-center gap-2"><span style="color:var(--yellow)">✓</span> Stay on track with due-date reminders</li>
+          <li class="flex items-center gap-2"><span style="color:var(--yellow)">✓</span> Full view of every client's receivables</li>
+          <li class="flex items-center gap-2"><span style="color:var(--yellow)">✓</span> Build habits that keep clients paying on time</li>
+        </ul>
+      </div>
+      <div class="bg-white rounded-2xl p-5 hover-card">
+        <div class="flex items-center justify-between mb-4">
+          <p class="font-bold text-[13px]">Recent Invoices</p>
+          <span class="text-[10px]" style="color:var(--muted)">Aug 2026</span>
+        </div>
+        <div class="space-y-2.5 text-[12.5px]">
+          <div class="flex justify-between items-center py-2 border-b" style="border-color:var(--border)"><span>Northwind Traders</span><span class="font-mono">$2,205.00</span><span class="px-2 py-0.5 rounded-full text-[9px] font-semibold" style="background:var(--peach); color:#B4791E">Sent</span></div>
+          <div class="flex justify-between items-center py-2 border-b" style="border-color:var(--border)"><span>Fenwick &amp; Co.</span><span class="font-mono">$960.00</span><span class="px-2 py-0.5 rounded-full text-[9px] font-semibold" style="background:var(--sage); color:var(--mint)">Paid</span></div>
+          <div class="flex justify-between items-center py-2"><span>Ridley &amp; Partners</span><span class="font-mono">$1,180.00</span><span class="px-2 py-0.5 rounded-full text-[9px] font-semibold" style="background:var(--rose); color:#C43E68">Overdue</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reviews" class="section-container py-16 text-center reveal">
+    <h2 class="font-extrabold text-[28px] lg:text-[36px]">What our <span class="font-accent">customers</span> say</h2>
+    <p class="mt-3 max-w-lg mx-auto text-[14.5px] leading-relaxed" style="color:var(--muted)">Real agencies, real ledgers, real invoices getting paid faster.</p>
+
+    <div class="flex items-center justify-center gap-4 sm:gap-6 mt-12">
+      <button onclick="prevTestimonial()" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 transition hover:opacity-85" style="background:var(--ink)">‹</button>
+
+      <div class="grid md:grid-cols-3 gap-6 items-center text-left w-full">
+        <div id="t-left" class="hidden md:block relative overflow-hidden bg-white rounded-2xl border p-7 hover-card t-fade opacity-70 scale-95">
+          <div class="corner-shape" style="opacity:.16"></div>
+          <div class="card-inner">
+            <div class="flex items-center gap-3 mb-4">
+              <div id="t-left-avatar" class="w-11 h-11 rounded-full"></div>
+              <div>
+                <p id="t-left-name" class="font-bold text-[14px]"></p>
+                <p id="t-left-loc" class="text-[11.5px]" style="color:var(--muted)"></p>
+              </div>
+            </div>
+            <p id="t-left-quote" class="text-[13.5px] leading-relaxed" style="color:var(--muted)"></p>
+          </div>
+        </div>
+
+        <div id="t-center" class="relative overflow-hidden bg-white rounded-2xl border-2 p-8 shadow-xl hover-card t-fade" style="border-color:var(--yellow)">
+          <div class="corner-shape" style="background:var(--yellow); opacity:.22"></div>
+          <div class="card-inner">
+            <div class="flex items-center gap-3 mb-4">
+              <div id="t-center-avatar" class="w-14 h-14 rounded-full border-4" style="border-color:var(--ink)"></div>
+              <div>
+                <p id="t-center-name" class="font-bold text-[15.5px]"></p>
+                <p id="t-center-loc" class="text-[12px]" style="color:var(--muted)"></p>
+              </div>
+            </div>
+            <p id="t-center-quote" class="text-[14.5px] leading-relaxed"></p>
+          </div>
+        </div>
+
+        <div id="t-right" class="hidden md:block relative overflow-hidden bg-white rounded-2xl border p-7 hover-card t-fade opacity-70 scale-95">
+          <div class="corner-shape" style="opacity:.16"></div>
+          <div class="card-inner">
+            <div class="flex items-center gap-3 mb-4">
+              <div id="t-right-avatar" class="w-11 h-11 rounded-full"></div>
+              <div>
+                <p id="t-right-name" class="font-bold text-[14px]"></p>
+                <p id="t-right-loc" class="text-[11.5px]" style="color:var(--muted)"></p>
+              </div>
+            </div>
+            <p id="t-right-quote" class="text-[13.5px] leading-relaxed" style="color:var(--muted)"></p>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="nextTestimonial()" class="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 transition hover:opacity-85" style="background:var(--ink)">›</button>
+    </div>
+
+    <div class="flex items-center justify-center gap-2 mt-8" id="t-dots"></div>
+  </section>
+
+  <section id="pricing" class="section-container py-16 reveal">
+    <div class="text-center max-w-lg mx-auto mb-8">
+      <h2 class="font-extrabold text-[28px] lg:text-[36px]">Simple <span class="font-accent">pricing</span>, no surprises</h2>
+    </div>
+    <div class="flex justify-center mb-10">
+      <div class="inline-flex rounded-full p-1" style="background:var(--lavender)">
+        <span class="px-5 py-2 rounded-full text-[13px] font-bold cursor-pointer" style="background:var(--ink); color:#fff">Monthly</span>
+        <span class="px-5 py-2 rounded-full text-[13px] font-bold cursor-pointer transition hover:bg-white/50" style="color:var(--ink)">Yearly</span>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6 items-center">
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-7 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:#5B3FD1; opacity:.12"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[26px] font-extrabold">$9<span class="text-[12px] font-medium" style="color:var(--muted)"> /mo</span></p>
+          <h3 class="font-bold text-[15px] mt-2">Starter</h3>
+          <p class="text-[12.5px] mt-1 mb-5" style="color:var(--muted)">For solo freelancers</p>
+          <ul class="space-y-2 text-[13px] mb-6" style="color:var(--muted)">
+            <li>✓ 20 invoices / month</li><li>✓ 1 team seat</li><li>✓ Branded PDFs</li>
+          </ul>
+          <a href="#" class="btn-outline block text-center py-2.5 rounded-full text-[13px] font-bold border-2" style="border-color:var(--ink)">Choose Your Plan</a>
+        </div>
+      </div>
+      <div class="relative overflow-hidden rounded-2xl p-7 text-white -translate-y-2 shadow-xl hover-card" style="background:var(--ink)">
+        <div class="corner-shape" style="background:var(--yellow); opacity:.18"></div>
+        <div class="card-inner">
+          <span class="absolute -top-10 right-0 text-[10px] font-bold px-3 py-1 rounded-full" style="background:var(--yellow); color:var(--ink)">Get Choose</span>
+          <p class="font-mono text-[28px] font-extrabold">$29<span class="text-[12px] font-medium" style="color:#B4A9DB"> /mo</span></p>
+          <h3 class="font-bold text-[15px] mt-2">Pro</h3>
+          <p class="text-[12.5px] mt-1 mb-5" style="color:#B4A9DB">For growing agencies</p>
+          <ul class="space-y-2 text-[13px] mb-6">
+            <li>✓ Unlimited invoices</li><li>✓ 5 team seats</li><li>✓ Recurring invoices</li><li>✓ Collection score</li>
+          </ul>
+          <a href="#" class="block text-center py-2.5 rounded-full text-[13px] font-bold transition hover:brightness-95" style="background:var(--yellow); color:var(--ink)">Choose Your Plan</a>
+        </div>
+      </div>
+      <div class="relative overflow-hidden bg-white rounded-2xl border p-7 hover-card" style="border-color:var(--border)">
+        <div class="corner-shape" style="background:#C2731E; opacity:.12"></div>
+        <div class="card-inner">
+          <p class="font-mono text-[26px] font-extrabold">$79<span class="text-[12px] font-medium" style="color:var(--muted)"> /mo</span></p>
+          <h3 class="font-bold text-[15px] mt-2">Business</h3>
+          <p class="text-[12.5px] mt-1 mb-5" style="color:var(--muted)">For studios with many clients</p>
+          <ul class="space-y-2 text-[13px] mb-6" style="color:var(--muted)">
+            <li>✓ Everything in Pro</li><li>✓ Unlimited seats</li><li>✓ Priority support</li>
+          </ul>
+          <a href="#" class="btn-outline block text-center py-2.5 rounded-full text-[13px] font-bold border-2" style="border-color:var(--ink)">Choose Your Plan</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t reveal" style="border-color:var(--border)">
+    <div class="section-container pt-16 pb-10">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div class="col-span-2">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-[12px] text-white" style="background:var(--ink)">P</div>
+            <span class="font-extrabold text-[15px]">PlusicInvoice</span>
+          </div>
+          <p class="text-[13.5px] leading-relaxed max-w-xs" style="color:var(--muted)">Isolated, Stripe-backed invoicing for agencies and studios that bill across borders.</p>
+          <div class="flex items-center gap-3 mt-5">
+            <a href="#" class="w-8 h-8 rounded-full flex items-center justify-center border transition hover:bg-[var(--ink)] hover:text-white" style="border-color:var(--border); color:var(--muted)">𝕏</a>
+            <a href="#" class="w-8 h-8 rounded-full flex items-center justify-center border transition hover:bg-[var(--ink)] hover:text-white" style="border-color:var(--border); color:var(--muted)">in</a>
+            <a href="#" class="w-8 h-8 rounded-full flex items-center justify-center border transition hover:bg-[var(--ink)] hover:text-white" style="border-color:var(--border); color:var(--muted)">gh</a>
+          </div>
+        </div>
+        <div>
+          <p class="text-[12px] font-bold uppercase tracking-wide mb-4">Product</p>
+          <ul class="space-y-2.5 text-[13.5px]" style="color:var(--muted)">
+            <li><a href="#features" class="hover-link">Features</a></li>
+            <li><a href="#pricing" class="hover-link">Pricing</a></li>
+            <li><a href="#reviews" class="hover-link">Reviews</a></li>
+            <li><a href="#" class="hover-link">Integrations</a></li>
+            <li><a href="#" class="hover-link">Security</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-[12px] font-bold uppercase tracking-wide mb-4">Company</p>
+          <ul class="space-y-2.5 text-[13.5px]" style="color:var(--muted)">
+            <li><a href="#" class="hover-link">About</a></li>
+            <li><a href="#" class="hover-link">Careers</a></li>
+            <li><a href="#" class="hover-link">Blog</a></li>
+            <li><a href="#" class="hover-link">Contact us</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-[12px] font-bold uppercase tracking-wide mb-4">Legal</p>
+          <ul class="space-y-2.5 text-[13.5px]" style="color:var(--muted)">
+            <li><a href="#" class="hover-link">Privacy policy</a></li>
+            <li><a href="#" class="hover-link">Terms of service</a></li>
+            <li><a href="#" class="hover-link">GDPR</a></li>
+            <li><a href="#" class="hover-link">Sign in</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-14 pt-6 border-t" style="border-color:var(--border)">
+        <p class="text-[12px]" style="color:var(--muted)">© 2026 PlusicInvoice. All rights reserved.</p>
+        <p class="text-[12px] font-mono" style="color:var(--muted)">Designed &amp; built by Md. Nayemur Rahman — Khulna, Bangladesh</p>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => io.observe(el));
+
+  const testimonials = [
+    { name:'Tomasz Wolski', loc:'Kestrel Labs — Warsaw', quote:'"Every client gets their own workspace, which made our compliance review a five-minute conversation instead of a month-long audit."', color:'var(--peach)' },
+    { name:'Elena Marsh', loc:'Ridley & Partners — London', quote:'"We stopped chasing invoices in spreadsheets the week we switched. The collection score alone told us which clients to follow up with first."', color:'var(--yellow)' },
+    { name:'Priya Nandakumar', loc:'Harborline Studio — Singapore', quote:'"Switched from a spreadsheet-plus-PayPal setup in an afternoon. Our clients think we hired a finance team."', color:'var(--sage)' },
+    { name:'Marcus Bello', loc:'Wren & Oak — Lagos', quote:'"Onboarding took less time than writing the invoice email we used to send manually."', color:'var(--rose)' },
+    { name:'Sofia Lindqvist', loc:'Acme Studio — Stockholm', quote:'"Our clients pay faster now that the payment link just works on mobile too."', color:'var(--lavender)' }
+  ];
+  let tIndex = 1;
+
+  function renderTestimonials(){
+    const n = testimonials.length;
+    const leftI = (tIndex - 1 + n) % n;
+    const rightI = (tIndex + 1) % n;
+    fillSlot('t-left', testimonials[leftI]);
+    fillSlot('t-center', testimonials[tIndex], true);
+    fillSlot('t-right', testimonials[rightI]);
+    renderDots();
+  }
+  function fillSlot(prefix, data, isCenter){
+    document.getElementById(prefix+'-name').textContent = data.name;
+    document.getElementById(prefix+'-loc').textContent = data.loc;
+    document.getElementById(prefix+'-quote').textContent = data.quote;
+    document.getElementById(prefix+'-avatar').style.background = data.color;
+    const shape = document.querySelector('#'+prefix+' .corner-shape');
+    if (shape && !isCenter) shape.style.background = data.color;
+  }
+  function renderDots(){
+    const dotsEl = document.getElementById('t-dots');
+    dotsEl.innerHTML = '';
+    testimonials.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'rounded-full transition';
+      dot.style.width = i === tIndex ? '20px' : '8px';
+      dot.style.height = '8px';
+      dot.style.background = i === tIndex ? 'var(--ink)' : 'var(--border)';
+      dot.onclick = () => { tIndex = i; renderTestimonials(); };
+      dotsEl.appendChild(dot);
+    });
+  }
+  function prevTestimonial(){ tIndex = (tIndex - 1 + testimonials.length) % testimonials.length; renderTestimonials(); }
+  function nextTestimonial(){ tIndex = (tIndex + 1) % testimonials.length; renderTestimonials(); }
+
+  renderTestimonials();
+</script>
+
+</body>
+</html>

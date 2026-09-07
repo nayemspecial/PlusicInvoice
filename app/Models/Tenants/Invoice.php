@@ -106,8 +106,9 @@ class Invoice extends Model
      */
     public static function nextInvoiceNumber(): string
     {
+        $prefix = Setting::get('invoice_prefix', 'INV');
         $next = static::count() + 1;
 
-        return 'INV-'.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+        return "{$prefix}-".str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 }

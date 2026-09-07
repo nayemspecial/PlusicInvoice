@@ -19,7 +19,7 @@ const navItems = [
     { label: 'Clients', href: '/clients', icon: 'clients', available: true },
     { label: 'Billing', href: '/billing', icon: 'billing', available: true, ownerOnly: true },
     { label: 'Team', href: '/team', icon: 'team', available: true, ownerOnly: true },
-    { label: 'Settings', href: '/settings', icon: 'settings', available: false },
+    { label: 'Settings', href: '/settings', icon: 'settings', available: true, ownerOnly: true },
 ];
 
 const isActive = (href: string) => page.url.startsWith(href);
@@ -133,7 +133,7 @@ const logout = () => router.post('/logout');
                 </div>
             </header>
 
-            <main class="flex-1 p-3 lg:p-5">
+            <main class="flex-1 p-5 lg:p-9">
                 <div
                     v-if="page.props.flash?.status"
                     class="mb-6 text-[13px] font-medium text-mint-strong bg-mint border border-mint-strong/30 rounded-xl px-4 py-3"

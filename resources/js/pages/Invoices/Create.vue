@@ -11,13 +11,14 @@ interface ClientOption {
 const props = defineProps<{
     clients: ClientOption[];
     nextInvoiceNumber: string;
+    defaults: { currency: string; taxRate: number };
 }>();
 
 const form = useForm({
     client_id: props.clients[0]?.id ?? '',
     issue_date: new Date().toISOString().slice(0, 10),
     due_date: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-    currency: 'USD',
+    currency: props.defaults.currency,
     tax_amount: 0,
     discount: 0,
     notes: '',
@@ -113,7 +114,17 @@ const submit = () => form.post('/invoices');
                         <span class="font-mono">{{ subtotal.toFixed(2) }}</span>
                     </div>
                     <div class="flex justify-between items-center text-[13.5px]">
-                        <span class="text-muted">Tax</span>
+                        <span class="text-muted">
+                            Tax
+                            <button
+                                v-if="defaults.taxRate > 0"
+                                type="button"
+                                @click="form.tax_amount = Math.round(subtotal * (defaults.taxRate / 100) * 100) / 100"
+                                class="ml-1 text-[10.5px] text-mint-strong font-semibold"
+                            >
+                                (use {{ defaults.taxRate }}%)
+                            </button>
+                        </span>
                         <input v-model.number="form.tax_amount" type="number" step="0.01" min="0" class="w-24 rounded-lg border border-border px-2 py-1 text-right font-mono text-[13px] outline-none" />
                     </div>
                     <div class="flex justify-between items-center text-[13.5px]">

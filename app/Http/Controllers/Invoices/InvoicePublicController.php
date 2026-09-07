@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Invoices;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenants\Invoice;
+use App\Models\Tenants\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,6 +25,7 @@ class InvoicePublicController extends Controller
         return Inertia::render('Invoices/PublicShow', [
             'invoice' => $invoice,
             'tenantName' => app('currentTenant')->name,
+            'footerNote' => Setting::get('invoice_footer_note'),
         ]);
     }
 
@@ -34,6 +36,7 @@ class InvoicePublicController extends Controller
         return Pdf::loadView('pdfs.invoice', [
             'invoice' => $invoice,
             'tenantName' => app('currentTenant')->name,
+            'footerNote' => Setting::get('invoice_footer_note'),
         ])->download("{$invoice->invoice_number}.pdf");
     }
 }

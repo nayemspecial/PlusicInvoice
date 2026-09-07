@@ -215,6 +215,18 @@ owner is `owner@northwind.test` / `password`).
 ## Phase 12 — Settings
 - [ ] Branding, currency, tax rate, invoice number format
 
+## Phase 12 — Settings
+- [x] `SettingsController` — invoice prefix, default currency, default tax rate,
+      invoice footer note, all backed by the existing (Phase 2, previously unused)
+      key-value `Setting` model
+- [x] `Invoice::nextInvoiceNumber()` now uses the configurable prefix
+- [x] Invoice Create form shows a "use X%" shortcut button applying the workspace's
+      default tax rate to the current subtotal (doesn't force-overwrite manual entry)
+- [x] Footer note appears on both the PDF and the public invoice page
+- [ ] **You run:** change the invoice prefix to something like "NW", save, create a
+      new invoice, confirm its number uses the new prefix; set a footer note and
+      confirm it shows on both the PDF download and the public `/pay/{token}` page
+
 ## Phase 13 — Tests (Pest)
 - [ ] Tenant isolation test (Tenant A can never see Tenant B's data)
 - [ ] Auth flow test

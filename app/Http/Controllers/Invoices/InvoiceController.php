@@ -56,6 +56,10 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Create', [
             'clients' => Client::orderBy('name')->get(['id', 'name']),
             'nextInvoiceNumber' => Invoice::nextInvoiceNumber(),
+            'defaults' => [
+                'currency' => \App\Models\Tenants\Setting::get('default_currency', 'USD'),
+                'taxRate' => (float) \App\Models\Tenants\Setting::get('default_tax_rate', 0),
+            ],
         ]);
     }
 
@@ -124,6 +128,7 @@ class InvoiceController extends Controller
         return Pdf::loadView('pdfs.invoice', [
             'invoice' => $invoice,
             'tenantName' => app('currentTenant')->name,
+            'footerNote' => \App\Models\Tenants\Setting::get('invoice_footer_note'),
         ])->download("{$invoice->invoice_number}.pdf");
     }
 
